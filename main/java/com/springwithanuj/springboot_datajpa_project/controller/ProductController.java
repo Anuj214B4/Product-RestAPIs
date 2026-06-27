@@ -1,6 +1,8 @@
 package com.springwithanuj.springboot_datajpa_project.controller;
 
+import com.springwithanuj.springboot_datajpa_project.dtos.PaginatedResponse;
 import com.springwithanuj.springboot_datajpa_project.dtos.ProductRequest;
+import com.springwithanuj.springboot_datajpa_project.dtos.ProductResponse;
 import com.springwithanuj.springboot_datajpa_project.model.Product;
 import com.springwithanuj.springboot_datajpa_project.service.ProductService;
 import jakarta.validation.Valid;
@@ -32,23 +34,28 @@ public class ProductController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<List<Product>> getAllProducts(){
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<PaginatedResponse<ProductResponse>>
+        getAllProducts(@RequestParam(required = false, defaultValue = "0") Integer pageNo,
+                       @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+                       @RequestParam(required = false, defaultValue = "productId") String sortBy,
+                       @RequestParam(required = false, defaultValue = "asc") String sortOrder) {
+
+        return ResponseEntity.ok(productService.getAllProducts(pageNo, pageSize, sortBy, sortOrder));
     }
 
     @GetMapping("/product/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id){
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
     @DeleteMapping("/product/{id}")
-    public ResponseEntity<String> deleteProductById(@PathVariable Long id){
+    public ResponseEntity<String> deleteProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.deleteProductById(id));
     }
 
     @GetMapping("/searchByBrand")
-    public ResponseEntity<?> getProductByBrand(@RequestParam String brand){
-        try{
+    public ResponseEntity<?> getProductByBrand(@RequestParam String brand) {
+        try {
             return ResponseEntity.ok(productService.searchProductByBrand(brand));
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -57,18 +64,18 @@ public class ProductController {
 
     @PutMapping("/updateProductByName")
     public ResponseEntity<String> updateProductByName(@RequestParam String name,
-                                                      @RequestBody Product product){
-        try{
+                                                      @RequestBody Product product) {
+        try {
             String msg = productService.updateProductByName(name, product);
             return ResponseEntity.ok(msg);
-        }catch (RuntimeException ex){
+        } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ex.getMessage());
         }
     }
 
     @GetMapping("/getAllProds")
-    public ResponseEntity<List<Product>> getAll(){
+    public ResponseEntity<List<Product>> getAll() {
         return ResponseEntity.ok(productService.getAll());
     }
 }

@@ -15,7 +15,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsProductByProductName(String name);
 
     //JPQL/HQL
-
     @Query("SELECT p From Product p")
     List<Product> getAllProducts();
 }

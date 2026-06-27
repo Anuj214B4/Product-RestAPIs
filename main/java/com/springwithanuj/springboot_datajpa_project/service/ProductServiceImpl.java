@@ -1,9 +1,15 @@
 package com.springwithanuj.springboot_datajpa_project.service;
 
+import com.springwithanuj.springboot_datajpa_project.dtos.PaginatedResponse;
 import com.springwithanuj.springboot_datajpa_project.dtos.ProductRequest;
+import com.springwithanuj.springboot_datajpa_project.dtos.ProductResponse;
 import com.springwithanuj.springboot_datajpa_project.model.Product;
 import com.springwithanuj.springboot_datajpa_project.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,18 +27,40 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> saveProducts(List<ProductRequest> productRequests) {
-
         List<Product> products = productRequests.stream()
                 .map(this::mapToEntity)
                 .toList();
-
         return productRepository.saveAllAndFlush(products);
     }
 
     @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public PaginatedResponse<ProductResponse> getAllProducts(Integer pageNo, Integer pageSize, String sortBy, String sortOrder) {
+
+        Sort sortByOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNo,pageSize, sortByOrder);
+
+        Page<Product> productPage = productRepository.findAll(pageDetails);
+
+        List<ProductResponse> products = productPage.getContent()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+
+        return PaginatedResponse.<ProductResponse>builder()
+                .content(products)
+                .pageNo(productPage.getNumber())
+                .pageSize(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .lastPage(productPage.isLast())
+                .build();
+
     }
+
+
 
     @Override
     public Product getProductById(Long id) {
@@ -80,4 +108,18 @@ public class ProductServiceImpl implements ProductService {
                 .stock(request.getStock())
                 .build();
     }
+
+    private ProductResponse mapToResponse(Product product){
+        return ProductResponse.builder()
+                .productId(product.getProductId())
+                .productBrand(product.getProductBrand())
+                .productName(product.getProductName())
+                .description(product.getDescription())
+                .productPrice(product.getProductPrice())
+                .productCategory(product.getProductCategory())
+                .stock(product.getStock())
+                .build();
+    }
+
+
 }

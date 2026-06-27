@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProductRequest {
 
-    private Long productId;
-
     @NotBlank(message = "Product brand is required")
     @Size(max = 100, message = "Product brand must not exceed 100 characters")
     private String productBrand;
@@ -27,8 +25,8 @@ public class ProductRequest {
     private String description;
 
 
-    @NotBlank(message = "Product price is required")
-    @Positive(message = "Price must be a valid number with up to 2 decimal places")
+    @NotNull(message = "Product price is required")
+    @Positive(message = "Product price must be greater than 0")
     private Double productPrice;
 
     @NotBlank(message = "Product category is required")
