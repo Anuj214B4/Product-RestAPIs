@@ -1,7 +1,9 @@
 package com.springwithanuj.springboot_datajpa_project.controller;
 
+import com.springwithanuj.springboot_datajpa_project.dtos.ProductRequest;
 import com.springwithanuj.springboot_datajpa_project.model.Product;
 import com.springwithanuj.springboot_datajpa_project.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,17 +18,17 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("/product")
-    public ResponseEntity<Product> saveProduct(@RequestBody Product product) {
+    public ResponseEntity<Product> saveProduct(@Valid @RequestBody ProductRequest productRequest) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(productService.saveProduct(product));
+                .body(productService.saveProduct(productRequest));
     }
 
     @PostMapping("/products")
-    public ResponseEntity<List<Product>> saveMultipleProduct(@RequestBody List<Product> products) {
+    public ResponseEntity<List<Product>> saveMultipleProduct(@Valid @RequestBody List<ProductRequest> productRequests) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(productService.saveProducts(products));
+                .body(productService.saveProducts(productRequests));
     }
 
     @GetMapping("/products")

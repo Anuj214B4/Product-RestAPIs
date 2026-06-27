@@ -20,9 +20,11 @@ public class Product {
 
     private String productName;
 
-    private String productPrice;
+    private String description;
 
-    private String productType;
+    private Double productPrice;
+
+    private String productCategory;
 
     private Integer stock;
 }

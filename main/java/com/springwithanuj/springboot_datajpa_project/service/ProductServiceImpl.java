@@ -1,5 +1,6 @@
 package com.springwithanuj.springboot_datajpa_project.service;
 
+import com.springwithanuj.springboot_datajpa_project.dtos.ProductRequest;
 import com.springwithanuj.springboot_datajpa_project.model.Product;
 import com.springwithanuj.springboot_datajpa_project.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +14,18 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     @Override
-    public Product saveProduct(Product product) {
-        return productRepository.save(product);
+    public Product saveProduct(ProductRequest productRequest) {
+        Product saveToDb = mapToEntity(productRequest);
+        return productRepository.save(saveToDb);
     }
 
     @Override
-    public List<Product> saveProducts(List<Product> products) {
+    public List<Product> saveProducts(List<ProductRequest> productRequests) {
+
+        List<Product> products = productRequests.stream()
+                .map(this::mapToEntity)
+                .toList();
+
         return productRepository.saveAllAndFlush(products);
     }
 
@@ -29,18 +36,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProductById(Long id) {
-        return productRepository
-                .findById(id).orElseThrow(
-                        () -> new RuntimeException("Product with this id " + id + " is not found!!")
-                );
+        return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product with this id " + id + " is not found!!"));
     }
 
     @Override
     public String deleteProductById(Long id) {
-        Product product = productRepository
-                .findById(id).orElseThrow(
-                        () -> new RuntimeException("Product with this id " + id + " is not found!!")
-                );
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product with this id " + id + " is not found!!"));
         productRepository.delete(product);
         return "Product with this id \"+id+\" is deleted!!";
     }
@@ -48,27 +49,35 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Object searchProductByBrand(String brand) {
         List<Product> products = productRepository.findProductByProductBrand(brand);
-        if (!products.isEmpty())
-            return products;
-        else
-            throw new RuntimeException("Product Not Found!!");
+        if (!products.isEmpty()) return products;
+        else throw new RuntimeException("Product Not Found!!");
     }
 
     @Override
     public String updateProductByName(String name, Product product) {
-        if (productRepository.existsProductByProductName(name)){
+        if (productRepository.existsProductByProductName(name)) {
             productRepository.save(product);
             return "Product details updated.";
         }
-        throw new RuntimeException("Product not exist with this product name : "+name);
+        throw new RuntimeException("Product not exist with this product name : " + name);
     }
 
     @Override
     public List<Product> getAll() {
         List<Product> products = productRepository.getAllProducts();
-        if (!products.isEmpty())
-            return products;
-        else
-            return List.of();
+        if (!products.isEmpty()) return products;
+        else return List.of();
+    }
+
+
+    private Product mapToEntity(ProductRequest request) {
+        return Product.builder()
+                .productName(request.getProductName())
+                .productPrice(request.getProductPrice())
+                .productBrand(request.getProductBrand())
+                .description(request.getDescription())
+                .productCategory(request.getProductCategory())
+                .stock(request.getStock())
+                .build();
     }
 }
